@@ -1,0 +1,107 @@
+{% extends "calculator/base.html" %}
+{% block title %}Профиль — {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="card" style="width: 560px;">
+
+    <h1>👤 Личный кабинет</h1>
+    <p style="color:#888;margin-bottom:20px;">{{ user.username }} · {{ user.email }}</p>
+
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-num">{{ total }}</div>
+            <div class="stat-label">Всего вычислений</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num">{{ today }}</div>
+            <div class="stat-label">Сегодня</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num">{{ week }}</div>
+            <div class="stat-label">За неделю</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" style="font-size:1.1rem;">{{ popular_op }}</div>
+            <div class="stat-label">Популярная операция</div>
+        </div>
+    </div>
+
+    <!-- Вынесенные стили для скролла -->
+    <style>
+        .history-scroll {
+            max-height: 350px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .history-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .history-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb {
+            background: #c4b5fd;
+            border-radius: 3px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+    </style>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h2>📋 История вычислений</h2>
+        {% if calculations %}
+        <form method="post" action="{% url 'calculator:clear_history' %}">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-sm" type="submit"
+                    onclick="return confirm('Удалить всю историю?')">
+                🗑 Очистить
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if calculations %}
+    <div class="history-scroll">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Выражение</th>
+                    <th>Результат</th>
+                    <th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in calculations %}
+                <tr>
+                    <td class="expr">{{ c.num1 }}
+                        {% if c.operation == 'add' %}+
+                        {% elif c.operation == 'subtract' %}−
+                        {% elif c.operation == 'multiply' %}×
+                        {% elif c.operation == 'divide' %}÷
+                        {% endif %}
+                        {{ c.num2 }}
+                    </td>
+                    <td>
+                        {% if c.error_message %}
+                        <span class="err">⚠ {{ c.error_message }}</span>
+                        {% else %}
+                        <span class="res">= {{ c.result }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="date-cell">{{ c.created_at|date:"d.m H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">Пока нет вычислений. <a href="{% url 'calculator:index' %}" class="link">Посчитать что-нибудь!</a></p>
+    {% endif %}
+
+    <div class="center mt-20">
+        <a href="{% url 'calculator:index' %}" class="link">← Вернуться к калькулятору</a>
+    </div>
+</div>
+{% endblock %}

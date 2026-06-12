@@ -1,0 +1,35 @@
+{% extends "calculator/base.html" %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>📝 Регистрация</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <ul class="field-errors">
+                {% for err in field.errors %}
+                <li>⚠️ {{ err }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% if field.help_text %}
+            <small style="color:#999;font-size:0.75rem;">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button class="btn" type="submit">Зарегистрироваться</button>
+    </form>
+
+    <p class="center mt-20">
+        Уже есть аккаунт? <a href="{% url 'calculator:login' %}" class="link">Войти</a>
+    </p>
+</div>
+{% endblock %}
